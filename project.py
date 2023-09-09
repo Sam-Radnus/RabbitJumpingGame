@@ -103,9 +103,12 @@ def main(stdscr):
                 stdscr.getch()
                 #time.sleep(2)
                 
-                #time.sleep(2)
-                curses.endwin()
-                print("Congratulations! You have won!\n")
+                time.sleep(1)
+                stdscr.clear()
+                stdscr.refresh()
+                stdscr.addstr(10, 10, "Congratulations You Have Won !!!")  # Indicate that the simulation has finished
+                stdscr.refresh()
+                time.sleep(2)
                 sys.exit()
                 
         elif dir == ord('j'):
