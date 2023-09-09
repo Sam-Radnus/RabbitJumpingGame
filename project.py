@@ -8,46 +8,27 @@ def is_adjacent(position1, position2):
     x2, y2 = position2
     return abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1
 
-def intro(stdscr):
-    curses.curs_set(0)
-    stdscr.clear()
-    stdscr.addstr("--------------------------------------------------------------\n")
-    stdscr.addstr("         Welcome to the Rabbit's Carrot Quest Game!\n")
-    stdscr.addstr("--------------------------------------------------------------\n\n")
-    
-    stdscr.addstr("Instructions:\n")
-    stdscr.addstr("- Use the arrow keys to guide Mr. Bunny through the garden.\n")
-    stdscr.addstr("- Press 'w' to move upward\n")
-    stdscr.addstr("- Press 's' to move downward\n")
-    stdscr.addstr("- Press 'a' to move left\n")
-    stdscr.addstr("- Press 'd' to move right\n")
-    stdscr.addstr("- Press 'p' to pick up a carrot when next to it\n")
-    stdscr.addstr("- Press 'j' to jump over rabbit holes\n")
-    stdscr.addstr("- Press 'E' to start simulation\n")
-    stdscr.addstr("- Collect carrots and drop them into the rabbit holes to win!\n")
-    stdscr.addstr("- Be careful not to get stuck or fall into holes!\n\n")
-    
-    stdscr.addstr("Gameplay:\n")
-    stdscr.addstr("- Mr. Bunny starts with 'r' and can pick up carrots ('c') to become 'R'.\n")
-    stdscr.addstr("- Once 'R', he can drop carrots in rabbit holes ('O') to win.\n")
-    stdscr.addstr("- Collect all carrots, deposit them, and you're victorious!\n")
-    stdscr.addstr("- Press '-1' anytime to exit the game.\n\n")
-    
-    stdscr.addstr("Have fun helping Mr. Bunny gather carrots and enjoy the adventure!\n")
-    stdscr.addstr("--------------------------------------------------------------\n")
-    stdscr.refresh()
-    stdscr.getch()
 
-def generate_unique_positions(stdscr,grid, randomNums, positions_list, n, obj):
+
+def generate_unique_positions(stdscr, grid, randomNums, positions_list, n, obj):
     unique_positions = []
-    stdscr.addstr("!!!")
-    while len(unique_positions) < randomNums:
+    max_attempts = n * n  # Maximum attempts to avoid an infinite loop
+    attempts = 0
+
+    while len(unique_positions) < randomNums and attempts < max_attempts:
         position = [random.randint(1, n - 1), random.randint(1, n - 1)]
         is_valid = all(not is_adjacent(position, existing_position) for existing_position in unique_positions)
         if is_valid:
             unique_positions.append(position)
             positions_list.append(position)
             grid[position[0]][position[1]] = obj  # Place carrots or holes on the grid
+        attempts += 1
+
+    if attempts >= max_attempts:
+        curses.endwin()
+        print("Error: Unable to generate unique positions. Try with a smaller grid or fewer objects.")
+        sys.exit(1)
+
     return unique_positions
 
 def check_adj(grid, y, x, char):
@@ -66,7 +47,7 @@ def main(stdscr):
     stdscr.keypad(True)
     stdscr.timeout(0)  # Non-blocking getch
 
-    #intro(stdscr)
+
     
     stdscr.addstr(0,0,"Enter the Grid size: ")
     stdscr.refresh()
@@ -96,6 +77,7 @@ def main(stdscr):
         
         if dir == ord('e') and c == 'r':
             findPaths(stdscr,grid, posY, posX)
+            
             break
         elif dir == ord('w'):
             posY -= 1
