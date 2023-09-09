@@ -1,105 +1,133 @@
 import random
-import sys,os
-
+import sys, os
+import curses
+from dijkstras import findPaths
+import time
 def is_adjacent(position1, position2):
     x1, y1 = position1
     x2, y2 = position2
     return abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1
 
-def intro():
-    print("--------------------------------------------------------------")
-    print("         Welcome to the Rabbit's Carrot Quest Game!")
-    print("--------------------------------------------------------------\n")
+def intro(stdscr):
+    curses.curs_set(0)
+    stdscr.clear()
+    stdscr.addstr("--------------------------------------------------------------\n")
+    stdscr.addstr("         Welcome to the Rabbit's Carrot Quest Game!\n")
+    stdscr.addstr("--------------------------------------------------------------\n\n")
     
-    print("Instructions:")
-    print("- Use the arrow keys to guide Mr. Bunny through the garden.")
-    print("- Press 'w' to move upward")
-    print("- Press 's' to move downward")
-    print("- Press 'a' to move left")
-    print("- Press 'd' to move right")
-    print("- Press 'p' to pick up a carrot when next to it")
-    print("- Press 'j' to jump over rabbit holes")
-    print("- Press 'E' to start simulation")
-    print("- Collect carrots and drop them into the rabbit holes to win!")
-    print("- Be careful not to get stuck or fall into holes!\n")
+    stdscr.addstr("Instructions:\n")
+    stdscr.addstr("- Use the arrow keys to guide Mr. Bunny through the garden.\n")
+    stdscr.addstr("- Press 'w' to move upward\n")
+    stdscr.addstr("- Press 's' to move downward\n")
+    stdscr.addstr("- Press 'a' to move left\n")
+    stdscr.addstr("- Press 'd' to move right\n")
+    stdscr.addstr("- Press 'p' to pick up a carrot when next to it\n")
+    stdscr.addstr("- Press 'j' to jump over rabbit holes\n")
+    stdscr.addstr("- Press 'E' to start simulation\n")
+    stdscr.addstr("- Collect carrots and drop them into the rabbit holes to win!\n")
+    stdscr.addstr("- Be careful not to get stuck or fall into holes!\n\n")
     
-    print("Gameplay:")
-    print("- Mr. Bunny starts with 'r' and can pick up carrots ('c') to become 'R'.")
-    print("- Once 'R', he can drop carrots in rabbit holes ('O') to win.")
-    print("- Collect all carrots, deposit them, and you're victorious!")
-    print("- Press '-1' anytime to exit the game.\n")
+    stdscr.addstr("Gameplay:\n")
+    stdscr.addstr("- Mr. Bunny starts with 'r' and can pick up carrots ('c') to become 'R'.\n")
+    stdscr.addstr("- Once 'R', he can drop carrots in rabbit holes ('O') to win.\n")
+    stdscr.addstr("- Collect all carrots, deposit them, and you're victorious!\n")
+    stdscr.addstr("- Press '-1' anytime to exit the game.\n\n")
     
-    print("Have fun helping Mr. Bunny gather carrots and enjoy the adventure!")
-    print("--------------------------------------------------------------")
+    stdscr.addstr("Have fun helping Mr. Bunny gather carrots and enjoy the adventure!\n")
+    stdscr.addstr("--------------------------------------------------------------\n")
+    stdscr.refresh()
+    stdscr.getch()
 
-def generate_simulation(grid):
-    pass
-
-def generate_unique_positions(randomNums, positions_list, n):
+def generate_unique_positions(stdscr,grid, randomNums, positions_list, n, obj):
     unique_positions = []
+    stdscr.addstr("!!!")
     while len(unique_positions) < randomNums:
         position = [random.randint(1, n - 1), random.randint(1, n - 1)]
         is_valid = all(not is_adjacent(position, existing_position) for existing_position in unique_positions)
         if is_valid:
             unique_positions.append(position)
             positions_list.append(position)
+            grid[position[0]][position[1]] = obj  # Place carrots or holes on the grid
     return unique_positions
 
-def check_adj(grid, y, x, char, lists):
+def check_adj(grid, y, x, char):
     directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
     for dy, dx in directions:
         new_y, new_x = y + dy, x + dx
-        if [new_y, new_x] in lists:
+        if grid[new_y][new_x] == char:
             return True, new_y, new_x
     return False, y, x
 
-def main():
-    intro()
-    n = int(input("Enter grid size: "))
-    grid = [['-' for _ in range(n)] for _ in range(n)]
-    number_of_carrots = int(input("Enter Number of Carrots: "))
-    number_of_holes = int(input("Enter Number of Holes: "))
-    carrots = []
-    holes = []
 
-    generate_unique_positions(number_of_carrots, carrots, n)
-    generate_unique_positions(number_of_holes, holes, n)
+def main(stdscr):
+    curses.curs_set(0)
+    curses.noecho()
+    curses.cbreak()
+    stdscr.keypad(True)
+    stdscr.timeout(0)  # Non-blocking getch
+
+    #intro(stdscr)
+    
+    stdscr.addstr(0,0,"Enter the Grid size: ")
+    stdscr.refresh()
+    n = int(stdscr.getstr(0, 25, 2).decode())
+    stdscr.addstr(1,0,str(n))
+    grid = [['-' for _ in range(n)] for _ in range(n)]
+    
+    stdscr.addstr(2,0,"Enter Number of Carrots: ")
+    stdscr.refresh()
+    number_of_carrots = int(stdscr.getstr(0, 25, 2).decode())
+    stdscr.addstr(3,0,str(number_of_carrots))
+    stdscr.addstr(4,0,"Enter Number of Holes: ")
+    stdscr.refresh()
+    number_of_holes = int(stdscr.getstr(0, 25, 2).decode())
+    stdscr.addstr(5,0,str(number_of_holes)) 
+    generate_unique_positions(stdscr, grid, number_of_carrots, [], n, "C")
+    generate_unique_positions(stdscr, grid, number_of_holes, [], n, "O")  # Place rabbit holes on the grid
 
     posX, posY, c, prevX, prevY = 0, 0, "r", 0, 0
 
     while True:
-        printGrid(grid,posX,posY,c,carrots,holes)
+        stdscr.clear()
         prevX = posX
         prevY = posY
         
-        dir = input("Enter your Instruction")[0]
-        os.system('cls')
-        if dir=="e" or dir=="E":
-            generate_simulation(grid)
-        elif dir == "w":
+        dir = stdscr.getch()
+        
+        if dir == ord('e') and c == 'r':
+            findPaths(stdscr,grid, posY, posX)
+            break
+        elif dir == ord('w'):
             posY -= 1
             posY = max(0, posY)
-        elif dir == "d":
+        elif dir == ord('d'):
             posX += 1
-            posX = min(n-1, posX)
-        elif dir == "s":
+            posX = min(n - 1, posX)
+        elif dir == ord('s'):
             posY += 1
-            posY = min(n-1, posY)
-        elif dir == "a":
+            posY = min(n - 1, posY)
+        elif dir == ord('a'):
             posX -= 1
             posX = max(0, posX)
-        elif dir == "p" and c == "r":
-            is_carrot_nearby, yPos, xPos = check_adj(grid, posY, posX, "c", carrots)
+        elif dir == ord('p') and c == "r":
+            is_carrot_nearby, yPos, xPos = check_adj(grid, posY, posX, "C")
             if is_carrot_nearby:
                 c = "R"
-                carrots.remove([yPos, xPos])
-        elif dir == "p" and c == "R":
-            is_hole_nearby, yPos, xPos = check_adj(grid, posY, posX, "O", holes)
+                grid[yPos][xPos] = '-'  # Remove carrot from grid
+        elif dir == ord('p') and c == "R":
+            is_hole_nearby, yPos, xPos = check_adj(grid, posY, posX, "O")
             if is_hole_nearby:
-                print("Congratulations! You have won!")
+                stdscr.refresh()
+                stdscr.getch()
+                #time.sleep(2)
+                
+                #time.sleep(2)
+                curses.endwin()
+                print("Congratulations! You have won!\n")
                 sys.exit()
-        elif dir == "j":
-            is_hole_nearby, yPos, xPos = check_adj(grid, posY, posX, "O", holes)
+                
+        elif dir == ord('j'):
+            is_hole_nearby, yPos, xPos = check_adj(grid, posY, posX, "O")
             if is_hole_nearby:
                 tempX = xPos - posX
                 tempY = yPos - posY
@@ -109,32 +137,31 @@ def main():
             if posX < 0 or posY < 0 or posX >= len(grid[0]) or posY >= len(grid):
                 posX = prevX
                 posY = prevY
-        else:
-            break
 
-        if [posY, posX] in carrots or [posY, posX] in holes:
+        elif dir == ord('-'):
+            curses.endwin()
+            sys.exit()
+
+        if grid[posY][posX] == 'C' or grid[posY][posX] == 'O':
             posX = prevX
             posY = prevY
 
+        # Print the updated grid
         
-
-def printGrid(grid,posX,posY,c,carrots,holes):
-    for i in range(len(grid)):
-            print()
+        
+        # Print the grid
+        for i in range(len(grid)):
             for j in range(len(grid[i])):
                 if i == posY and j == posX:
-                    print(c + " ", end="")
-                elif [i, j] in carrots:
-                    print("c" + " ", end="")
-                elif [i, j] in holes:
-                    print("O" + " ", end="")
+                    stdscr.addch(posY, posX, ord(c))
                 else:
-                    print(grid[i][j] + " ", end="")
-            print()
+                    stdscr.addch(i, j, ord(grid[i][j]))
+                
         
-    
-
+        # Refresh the screen
+        stdscr.refresh()
+        time.sleep(0.1)
 
 
 if __name__ == "__main__":
-    main()
+    curses.wrapper(main)
