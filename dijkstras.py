@@ -1,6 +1,7 @@
 from collections import deque
 import os,time
 import curses
+import sys
 def find_shortest_path(grid, start, end):
     num_rows = len(grid)
     num_cols = len(grid[0])
@@ -38,21 +39,21 @@ def findPaths(stdscr, grid, y, x):
     # Initialize curses settings
     curses.curs_set(0)
     stdscr.clear()
-    
+
     stdscr.refresh()
     curses.napms(2000)
-    stdscr.addstr(5,5,"Generating Simulation.")
+    stdscr.addstr(5, 5, "Generating Simulation.")
     stdscr.refresh()
     curses.napms(1000)
-    stdscr.addstr(5,5,"Generating Simulation..")
+    stdscr.addstr(5, 5, "Generating Simulation..")
     stdscr.refresh()
     curses.napms(1000)
-    stdscr.addstr(5,5,"Generating Simulation...")
+    stdscr.addstr(5, 5, "Generating Simulation...")
     stdscr.refresh()
     curses.napms(1000)
-    stdscr.addstr(5,5,"Generating Simulation....")
+    stdscr.addstr(5, 5, "Generating Simulation....")
     stdscr.refresh()
-    curses.napms(1000)  
+    curses.napms(1000)
     carrots = []
     holes = []
     for i in range(len(grid)):
@@ -61,7 +62,7 @@ def findPaths(stdscr, grid, y, x):
                 carrots.append([i, j])
             if grid[i][j] == 'O':
                 holes.append([i, j])
-    
+
     res = []
     hres = []
 
@@ -69,22 +70,31 @@ def findPaths(stdscr, grid, y, x):
         shortest_path = find_shortest_path(grid, (y, x), (carrot[0], carrot[1]))
         if shortest_path:
             res.append(shortest_path)
-    
+
     res = sorted(res, key=lambda x: len(x))
+
+    if not res:
+        curses.endwin()
+        print("Error: No valid path to any carrot.")
+        sys.exit(1)
 
     for hole in holes:
         shortest_path = find_shortest_path(grid, (res[0][0][0], res[0][0][1]), (hole[0], hole[1]))
         if shortest_path:
             hres.append(shortest_path)
-    
+
     hres = sorted(hres, key=lambda x: len(x))
+
+    if not hres:
+        curses.endwin()
+        print("Error: No valid path from carrot to any rabbit hole.")
+        sys.exit(1)
 
     r_2_c = res[0]
     r_2_c.reverse()
     e_i = 0
     e_j = 0
-    
-    
+
     for row, col in r_2_c:
         stdscr.clear()
         for i in range(len(grid)):
@@ -95,16 +105,14 @@ def findPaths(stdscr, grid, y, x):
                     e_j = j
                 else:
                     stdscr.addch(i, j, ord(grid[i][j]))
-            stdscr.addstr(3,10," Finding Carrot")
-                #stdscr.addch(i, j * 2 + 1, ord(' '))
-      
+            stdscr.addstr(3, 10, " Finding Carrot")
         stdscr.refresh()
-        time.sleep(2)
-    
+        time.sleep(1)
+
     c_2_o = hres[0]
     c_2_o.reverse()
     grid[e_i][e_j] = '-'
-    
+
     for row, col in c_2_o:
         stdscr.clear()
         for i in range(len(grid)):
@@ -113,12 +121,13 @@ def findPaths(stdscr, grid, y, x):
                     stdscr.addch(i, j, ord('R'))
                 else:
                     stdscr.addch(i, j, ord(grid[i][j]))
-            stdscr.addstr(5,10," Finding a Rabbit hole to put that Carrot")
-                #stdscr.addch(i, j * 2 + 1, ord(' '))
+            stdscr.addstr(5, 10, " Finding a Rabbit hole to put that Carrot")
         stdscr.refresh()
-        time.sleep(2)
-    
-    stdscr.getch() 
-        
-   
+        time.sleep(1)       
+    stdscr.clear()
+    stdscr.refresh()
+    stdscr.addstr(10, 10, "Simulation finished.")  # Indicate that the simulation has finished
+    stdscr.refresh()
+    time.sleep(2)
+    stdscr.getch()
     
