@@ -16,12 +16,12 @@ Rabbit's Carrot Quest Game is a text-based adventure game where you help Mr. Bun
 
 ## Description
 
-Rabbit's Carrot Quest Game is a fun and challenging game where you guide Mr. Bunny through a garden filled with carrots ('c') and rabbit holes ('O'). You start as 'r' and can pick up carrots to become 'R'. Your goal is to collect all the carrots and drop them into the rabbit holes to win. Be careful not to get stuck or fall into holes along the way!
+Rabbit's Carrot Quest Game is a fun and challenging game where you guide Mr. Bunny through a garden filled with carrots ('C') and rabbit holes ('O'). You start as 'r' and can pick up carrots to become 'R'. Your goal is to collect all the carrots and drop them into the rabbit holes to win. Be careful not to get stuck or fall into holes along the way!
 
 ## Features
 
 - Navigate Mr. Bunny through a garden using arrow keys.
-- Collect carrots ('c') to become 'R'.
+- Collect carrots ('C') to become 'R'.
 - Drop carrots in rabbit holes ('O') to win.
 - Avoid getting stuck or falling into holes.
 - Enjoy an adventure with Mr. Bunny!
@@ -85,7 +85,7 @@ cd path/to/rabbits-carrot-quest
 - 'p' to pick up a carrot when next to it.
 - 'j' to jump over rabbit holes.
 - 'e' to start simulation.
-- Collect carrots ('c') and drop them in rabbit holes ('O') to win!
+- Collect carrots ('C') and drop them in rabbit holes ('O') to win!
 
 
 Have fun playing Rabbit's Carrot Quest Game!
